@@ -76,22 +76,24 @@ dtgroup2$date <- weekdays(dtgroup2$date)
 
 # create 2 subsets for weekday and weekend 
 dtweekday <- dtgroup2[grep("Monday|Tuesday|Wednesday|Thursday|Friday", date, ignore.case =T)]
+wkdy <- group_by(dtweekday, interval)
+wkdymean <- summarise(wkdy, mean(steps))
+
 dtweekend <- dtgroup2[grep("Saturday|Sunday", date, ignore.case = T)]
+wknd <- group_by(dtweekend, interval)
+wkndmean <- summarise(wknd, mean(steps))
 
 # add the day_type column to both datasets
-dtweekday <- data.table(dtweekday, day_type = "weekday")
-dtweekend <- data.table(dtweekend, day_type = "weekend")
+wkdymean <- data.table(wkdymean, day_type = "weekday")
+wkndmean <- data.table(wkndmean, day_type = "weekend")
 
 # row bind the 2 datasets to creat a new factor variable in the dataset with two levels - "weekday" and "weekend" 
-dtgroup2 <- rbind(dtweekday, dtweekend)
+dtgroup3 <- rbind(wkdymean, wkndmean)
 
-# use the weekday and weekend datasets to plot the graphs for 5-minute intervals
-intwkdy <- group_by(dtweekday, interval)
-dtwkdy <- summarise(intwkdy, mean(steps))
-plot(dtwkdy$interval, dtwkdy$`mean(steps)`, main = "Time Series of Average Steps (Weekday)",
-     type = "l", xlab = "5-minute Interval", ylab = "Average Steps")
+# plot the graphs for 5-minute intervals
 
-intwknd <- group_by(dtweekend, interval)
-dtwknd <- summarise(intwknd, mean(steps))
-plot(dtwknd$interval, dtwknd$`mean(steps)`, main = "Time Series of Average Steps (Weekend)",
-     type = "l", xlab = "5-minute Interval", ylab = "Average Steps")
+library(lattice)
+wk <- xyplot(dtgroup3$`mean(steps)` ~ dtgroup3$interval | factor(dtgroup3$day_type),
+             type = "l", main = "Average Steps per 5-minute Interval", 
+             ylab = "Number of Steps", xlab = "Interval")
+print(wk)
