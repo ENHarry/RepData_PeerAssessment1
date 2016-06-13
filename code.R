@@ -53,33 +53,45 @@ maxindex <- which.max(dtinterval$`mean(steps)`)
 max5 <- rownames(df)[maxindex]
 
 # Question 4
-# I am assuming that the NA values are for periods when the device was off.
-# now I will replace all the NA's with 0
-dt[is.na(dt)] <- 0
+# load the mice package and view the pattern of the missing data
+library(mice)
+md.pattern(dataset1)
+
+library(VIM)
+aggr_plot <- aggr(dataset1, col=c('magenta','gray'), numbers=TRUE, sortVars=TRUE, 
+                  labels=names(dataset1), cex.axis=.7, gap=3, 
+                  ylab=c("Histogram of missing data","Pattern"))
+
+# use the predictive mean matching method in imputing the missing data
+tempData <- mice(dataset1,m=5,maxit=10,meth='pmm',seed=500)
+summary(tempData)
+completedData <- complete(tempData,2)
 
 # To find the total steps per day, convert to data table and subset by date
 # sum the steps in each subset. Use the dplyr package to do the grouping
-dtgroup2 <- group_by(dt, date)
-dtotal <- summarise(dtgroup2, sum(steps))
-dtmean <- mean(dtotal$`sum(steps)`)
-dtmedian <- median(dtotal$`sum(steps)`)
+completedData <- as.data.table(completedData)
+comp <- group_by(dt, date)
+ctotal <- summarise(comp, sum(steps))
+cmean <- mean(ctotal$`sum(steps)`)
+cmedian <- median(ctotal$`sum(steps)`)
 
 # plot the histogram of the total daily steps after NA values are added
-plot(dtotal$date, dtotal$`sum(steps)`, type = "h", lwd = 10,
+plot(ctotal$date, ctotal$`sum(steps)`, type = "h", lwd = 10,
      main = "Total Daily Steps", xlab = "Date", ylab = "Steps", col = 11)
-hist(dtotal$`sum(steps)`, main = "Total Daily Steps", xlab = "Steps", 
+hist(ctotal$`sum(steps)`, main = "Total Daily Steps", xlab = "Steps", 
      ylab = "Time Interval", col = 7)
 
 # Question 5
 # view date as weekdays
-dtgroup2$date <- weekdays(dtgroup2$date)
+comp$date <- as.Date(comp$date)
+comp$date <- weekdays(comp$date)
 
 # create 2 subsets for weekday and weekend 
-dtweekday <- dtgroup2[grep("Monday|Tuesday|Wednesday|Thursday|Friday", date, ignore.case =T)]
+dtweekday <- comp[grep("Monday|Tuesday|Wednesday|Thursday|Friday", date, ignore.case =T)]
 wkdy <- group_by(dtweekday, interval)
 wkdymean <- summarise(wkdy, mean(steps))
 
-dtweekend <- dtgroup2[grep("Saturday|Sunday", date, ignore.case = T)]
+dtweekend <- comp[grep("Saturday|Sunday", date, ignore.case = T)]
 wknd <- group_by(dtweekend, interval)
 wkndmean <- summarise(wknd, mean(steps))
 
@@ -95,5 +107,5 @@ dtgroup3 <- rbind(wkdymean, wkndmean)
 library(lattice)
 wk <- xyplot(dtgroup3$`mean(steps)` ~ dtgroup3$interval | factor(dtgroup3$day_type),
              type = "l", main = "Average Steps per 5-minute Interval", 
-             ylab = "Number of Steps", xlab = "Interval")
+             ylab = "Number of Steps", xlab = "Interval", layout = c(1,2))
 print(wk)

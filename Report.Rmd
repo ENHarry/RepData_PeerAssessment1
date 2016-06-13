@@ -53,6 +53,15 @@ setnames(dtanalysis, c("date", "sum(steps)"),
          c("date", "total_steps"))
 ```
 
+Plot the histogram of the total daily steps
+
+```{r fig.width=8, fig.height=6}
+plot(dtanalysis$total_steps, type = "h", lwd = 10,
+     main = "Total Daily Steps", xlab = "Days", ylab = "Steps", col = 6)
+abline(h = mean(dtanalysis$total_steps), col = 2)
+abline(h = median(dtanalysis$total_steps), col = 3)
+
+```
 Finding the mean and median of steps derived from the total daily steps.
 
 ```{r}
@@ -60,16 +69,6 @@ firstmean <- mean(dtanalysis$total_steps)
 firstmedian <- median(dtanalysis$total_steps)
 ```
 The mean is `r firstmean` and the median is `r firstmedian`.
-
-Plot the histogram of the total daily steps
-
-```{r fig.width=8, fig.height=6}
-plot(dtanalysis$date, dtanalysis$total_steps, type = "h", lwd = 10,
-     main = "Total Daily Steps", xlab = "Date", ylab = "Steps", col = 6)
-
-hist(dtanalysis$total_steps, main = "Total Daily Steps", xlab = "Steps", 
-     ylab = "Time Interval", col = 2)
-```
 
 ### Section 3
 
@@ -124,10 +123,9 @@ There is a difference between the new mean and median because when the first one
 plot the histogram of the total daily steps after NA values are added.
 
 ```{r fig.height=7, fig.width=8}
-plot(dtotal$date, dtotal$`sum(steps)`, type = "h", lwd = 10,
-     main = "Total Daily Steps", xlab = "Date", ylab = "Steps", col = 11)
-hist(dtotal$`sum(steps)`, main = "Total Daily Steps", xlab = "Steps", 
-     ylab = "Time Interval", col = 7)
+plot(dtotal$`sum(steps)`, type = "h", lwd = 7,
+     main = "Total Daily Steps", xlab = "Days", ylab = "Steps", col = 11)
+
 ```
 
 ### Section 5
@@ -167,9 +165,7 @@ Use the weekday and weekend datasets to plot the graphs for 5-minute intervals
 
 ```{r fig.height=7, fig.width=8}
 library(lattice)
-wk <- xyplot(dtgroup3$`mean(steps)` ~ dtgroup3$interval | factor(dtgroup3$day_type),
-             type = "l", main = "Average Steps per 5-minute Interval", 
-             ylab = "Number of Steps", xlab = "Interval")
+wk <- xyplot(dtgroup3$`mean(steps)` ~ dtgroup3$interval | factor(dtgroup3$day_type), type = "l", main = "Average Steps per 5-minute Interval", ylab = "Number of Steps", xlab = "Interval", layout = c(1,2))
 print(wk)
 ```
 
