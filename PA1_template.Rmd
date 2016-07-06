@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, tidy = TRUE)
 ```
 
 ## Section 1
@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Read dataset into R
 
-```{r}
+```{r echo = TRUE}
 fileurl <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
 temp <- tempfile()
 download.file(fileurl, temp) 
@@ -32,7 +32,7 @@ Next, to find the total steps per day
 - Convert to data table and convert the data column variables to dates.
 - Remove the NA's
 
-```{r}
+```{r echo = TRUE}
 library(data.table)
 dt <- as.data.table(dataset1)
 dt$date <- as.Date(dt$date)
@@ -44,7 +44,7 @@ dt2 <- na.omit(dt)
 - Load the dply package and use it to group by date and create the subset.
 - Summarise the steps each and save in a new dataset
 
-```{r}
+```{r echo = TRUE}
 library(dplyr)
 dtgroup <- group_by(dt2, date)
 dtanalysis <- summarise(dtgroup, sum(steps))
@@ -52,14 +52,14 @@ dtanalysis <- summarise(dtgroup, sum(steps))
 
 Check the column names and reset it to apprioprate names
 
-```{r}
+```{r echo = TRUE}
 names(dtanalysis)
 setnames(dtanalysis, c("date", "sum(steps)"),
          c("date", "total_steps"))
 ```
 Plot the histogram of the total daily steps
 
-```{r fig.width=8, fig.height=6}
+```{r fig.width=8, fig.height=6, echo = TRUE}
 plot(dtanalysis$total_steps, type = "h", lwd = 10,
      main = "Total Daily Steps", xlab = "Days", ylab = "Steps", col = 6)
 abline(h = mean(dtanalysis$total_steps), col = 2)
@@ -70,7 +70,7 @@ abline(h = median(dtanalysis$total_steps), col = 3)
 
 Finding the mean and median of steps derived from the total daily steps.
 
-```{r}
+```{r echo = TRUE}
 firstmean <- mean(dtanalysis$total_steps)
 firstmedian <- median(dtanalysis$total_steps)
 ```
@@ -80,7 +80,7 @@ The mean is `r firstmean` and the median is `r firstmedian`.
 
 Group by time interval and find thier averages
 
-```{r }
+```{r echo = TRUE}
 intvervalgroup <- group_by(dt2, interval)
 dtinterval <- summarise(intvervalgroup, mean(steps))
 ```
@@ -89,14 +89,14 @@ dtinterval <- summarise(intvervalgroup, mean(steps))
 
 Plot time series of average steps taken
 
-```{r fig.width=8, fig.height=7}
+```{r fig.width=8, fig.height=7, echo = TRUE}
 plot(dtinterval$interval, dtinterval$`mean(steps)`, main = "Time Series of Average Steps (5 interval)",
      type = "l", xlab = "5-minute Interval", ylab = "Average Steps")
 ```
 
 Set the interval as row names and get the corresponding value for the max mean
 
-```{r}
+```{r echo = TRUE}
 df <- as.data.frame(dtinterval)
 row.names(df) <- dtinterval$interval
 maxindex <- which.max(dtinterval$`mean(steps)`)
@@ -112,7 +112,7 @@ The 5-minute interval with the highest average steps is `r max5`.
 load the mice package and view the pattern of the missing data
 
 
-```{r fig.height=5, fig.width=4}
+```{r fig.height=5, fig.width=4, echo = TRUE}
 library(mice)
 md.pattern(dataset1)
 
@@ -123,7 +123,7 @@ aggr_plot <- aggr(dataset1, col=c('magenta','gray'), numbers=TRUE, sortVars=TRUE
 ```
 
 use the predictive mean matching method in imputing the missing data
-```{r}
+```{r echo = TRUE}
 tempData <- mice(dataset1,m=5,maxit=10,meth='pmm',seed=500)
 
 summary(tempData)
@@ -133,7 +133,7 @@ completedData <- complete(tempData,2)
 To find the total steps per day, convert to data table and subset by date.
 Then sum the steps in each subset. Use the dplyr package to do the grouping.
 
-```{r}
+```{r echo = TRUE}
 completedData <- as.data.table(completedData)
 comp <- group_by(completedData, date)
 ctotal <- summarise(comp, sum(steps))
@@ -147,7 +147,7 @@ There is a difference between the new mean and the old mean because when the fir
 
 plot the histogram of the total daily steps after NA values are added.
 
-```{r fig.height=7, fig.width=8}
+```{r fig.height=7, fig.width=8, echo = TRUE}
 plot(ctotal$`sum(steps)`, type = "h", lwd = 7,
      main = "Total Daily Steps", xlab = "Days", ylab = "Steps", col = 11)
 
@@ -157,14 +157,14 @@ plot(ctotal$`sum(steps)`, type = "h", lwd = 7,
 
 View date as weekdays
 
-```{r}
+```{r echo = TRUE}
 comp$date <- as.Date(comp$date)
 comp$date <- weekdays(comp$date)
 ```
 
 Create 2 subsets for weekday and weekend 
 
-```{r}
+```{r echo = TRUE}
 dtweekday <- comp[grep("Monday|Tuesday|Wednesday|Thursday|Friday", date, ignore.case =T)]
 wkdy <- group_by(dtweekday, interval)
 wkdymean <- summarise(wkdy, mean(steps))
@@ -176,20 +176,20 @@ wkndmean <- summarise(wknd, mean(steps))
 
 Add the day_type column to both datasets
 
-```{r}
+```{r echo = TRUE}
 wkdymean <- data.table(wkdymean, day_type = "weekday")
 wkndmean <- data.table(wkndmean, day_type = "weekend")
 ```
 
 Row bind the 2 datasets to creat a new factor variable in the dataset with two levels - "weekday" and "weekend"
 
-```{r}
+```{r echo = TRUE}
 dtgroup3 <- rbind(wkdymean, wkndmean)
 ```
 
 Use the weekday and weekend datasets to plot the graphs for 5-minute intervals
 
-```{r fig.height=7, fig.width=8}
+```{r fig.height=7, fig.width=8, echo = TRUE}
 library(lattice)
 wk <- xyplot(dtgroup3$`mean(steps)` ~ dtgroup3$interval | factor(dtgroup3$day_type), type = "l", main = "Average Steps per 5-minute Interval", ylab = "Number of Steps", xlab = "Interval", layout = c(1,2))
 print(wk)
