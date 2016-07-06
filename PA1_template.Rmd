@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE, tidy = FALSE, fig.show = 'asis', fig.width=8,
 
 Read dataset into R
 
-```{r}
+```{r LOAD}
 fileurl <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
 temp <- tempfile()
 download.file(fileurl, temp) 
@@ -59,7 +59,7 @@ setnames(dtanalysis, c("date", "sum(steps)"),
 ```
 Plot the histogram of the total daily steps
 
-```{r}
+```{r SECTION2-PLOT}
 plot(dtanalysis$total_steps, type = "h", lwd = 10,
      main = "Total Daily Steps", xlab = "Days", ylab = "Steps", col = 6)
 abline(h = mean(dtanalysis$total_steps), col = 2)
@@ -89,7 +89,7 @@ dtinterval <- summarise(intvervalgroup, mean(steps))
 
 Plot time series of average steps taken
 
-```{r}
+```{r SECTION3-PLOT}
 plot(dtinterval$interval, dtinterval$`mean(steps)`, main = "Time Series of Average Steps (5 interval)",
      type = "l", xlab = "5-minute Interval", ylab = "Average Steps")
 ```
@@ -147,7 +147,7 @@ There is a difference between the new mean and the old mean because when the fir
 
 plot the histogram of the total daily steps after NA values are added.
 
-```{r}
+```{r SECTION4-PLOT}
 plot(ctotal$`sum(steps)`, type = "h", lwd = 7,
      main = "Total Daily Steps", xlab = "Days", ylab = "Steps", col = 11)
 
@@ -189,7 +189,7 @@ dtgroup3 <- rbind(wkdymean, wkndmean)
 
 Use the weekday and weekend datasets to plot the graphs for 5-minute intervals
 
-```{r}
+```{r SECTION5-PLOT}
 library(lattice)
 wk <- xyplot(dtgroup3$`mean(steps)` ~ dtgroup3$interval | factor(dtgroup3$day_type), type = "l", main = "Average Steps per 5-minute Interval", ylab = "Number of Steps", xlab = "Interval", layout = c(1,2))
 print(wk)
