@@ -5,6 +5,10 @@ date: "June 8, 2016"
 output: html_document
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
 ## Section 1
 ### Loading and preprocessing the data
 
